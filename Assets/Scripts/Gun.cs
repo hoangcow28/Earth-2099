@@ -114,7 +114,14 @@ public class Gun : MonoBehaviour
     {
         if (ammoText != null)
         {
-            ammoText.text = currentAmmo > 0 ? currentAmmo.ToString() : "Empty";
+            if (currentAmmo > 0)
+            {
+                ammoText.text = currentAmmo.ToString();
+            }
+            else
+            {
+                ammoText .text = "Empty";
+            }
         }
     }
 
