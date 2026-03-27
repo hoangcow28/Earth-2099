@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
 public class Player : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 5f;
@@ -12,18 +13,20 @@ public class Player : MonoBehaviour
     private float currentHp;
     [SerializeField] private Image hpBar;
     [SerializeField] private GameManager gameManager;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        spriteRenderer = GetComponent<SpriteRenderer>();    
+        spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
     }
+
     void Start()
     {
         currentHp = maxHp;
         UpdateHpBar();
     }
-   
+
     void Update()
     {
         MovePlayer();
@@ -32,10 +35,12 @@ public class Player : MonoBehaviour
             gameManager.PauseGameMenu();
         }
     }
+
     void MovePlayer()
     {
         Vector2 playerInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         rb.velocity = playerInput.normalized * moveSpeed;
+
         if (playerInput.x < 0)
         {
             spriteRenderer.flipX = true;
@@ -44,25 +49,29 @@ public class Player : MonoBehaviour
         {
             spriteRenderer.flipX = false;
         }
+
         if (playerInput != Vector2.zero)
         {
             animator.SetBool("isRun", true);
         }
         else
         {
-            animator.SetBool("isRun",false);
+            animator.SetBool("isRun", false);
         }
     }
+
     public void TakeDamage(float damage)
     {
         currentHp -= damage;
         currentHp = Mathf.Max(currentHp, 0);
         UpdateHpBar();
+
         if (currentHp <= 0)
         {
             Die();
         }
     }
+
     public void Heal(float healValue)
     {
         if (currentHp < maxHp)
@@ -72,10 +81,24 @@ public class Player : MonoBehaviour
             UpdateHpBar();
         }
     }
+
+    public void ReviveHalfHealth()
+    {
+        currentHp = maxHp / 2f;
+
+        if (currentHp <= 0)
+            currentHp = 1f;
+
+        UpdateHpBar();
+
+        Debug.Log("Player revived with half HP: " + currentHp);
+    }
+
     private void Die()
     {
         gameManager.GameOverMenu();
     }
+
     private void UpdateHpBar()
     {
         if (hpBar != null)

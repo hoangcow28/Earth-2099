@@ -21,12 +21,54 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject scoreUI;
     [SerializeField] private GameObject shopButton;
     [SerializeField] private GameObject coinIcon;
-
+    [SerializeField] private GameObject reviveButton;
+    private bool hasUsedAdRevive = false;
     public static GameManager instance;
 
     void Awake()
     {
         instance = this;
+    }
+    public void RevivePlayer()
+    {
+        if (hasUsedAdRevive)
+        {
+            Debug.Log("Da dung revive bang quang cao roi.");
+            return;
+        }
+
+        Debug.Log("Revive player");
+
+        hasUsedAdRevive = true;
+
+        mainMenu.SetActive(false);
+        gameOverMenu.SetActive(false);
+        pauseMenu.SetActive(false);
+        winMenu.SetActive(false);
+
+        if (scoreUI != null)
+            scoreUI.SetActive(true);
+
+        if (shopButton != null)
+            shopButton.SetActive(false);
+
+        if (coinIcon != null)
+            coinIcon.SetActive(true);
+
+        if (reviveButton != null)
+            reviveButton.SetActive(false);
+
+        Time.timeScale = 1f;
+
+        Player player = FindObjectOfType<Player>();
+        if (player != null)
+        {
+            player.ReviveHalfHealth();
+        }
+        else
+        {
+            Debug.LogError("Khong tim thay Player trong scene.");
+        }
     }
 
     private int score = 0;
@@ -180,9 +222,15 @@ public class GameManager : MonoBehaviour
         winMenu.SetActive(false);
         scoreUI.SetActive(false);
         Time.timeScale = 0f;
+
         if (coinIcon != null)
         {
             coinIcon.SetActive(false);
+        }
+
+        if (reviveButton != null)
+        {
+            reviveButton.SetActive(!hasUsedAdRevive);
         }
     }
 
@@ -206,6 +254,8 @@ public class GameManager : MonoBehaviour
 
     public void StartGame()
     {
+        hasUsedAdRevive = false;
+
         mainMenu.SetActive(false);
         gameOverMenu.SetActive(false);
         pauseMenu.SetActive(false);
@@ -217,12 +267,22 @@ public class GameManager : MonoBehaviour
             shopButton.SetActive(false);
         }
 
+        if (reviveButton != null)
+        {
+            reviveButton.SetActive(true);
+        }
+
         Time.timeScale = 1f;
         audioManager.PlayDefaultSound();
+
         if (coinIcon != null)
         {
             coinIcon.SetActive(true);
         }
+    }
+    public bool CanUseAdRevive()
+    {
+        return !hasUsedAdRevive;
     }
 
     public void ResumeGame()
@@ -242,5 +302,16 @@ public class GameManager : MonoBehaviour
         {
             coinIcon.SetActive(true);
         }
+    }
+    public void HideGameOverMenuOnly()
+    {
+        if (gameOverMenu != null)
+            gameOverMenu.SetActive(false);
+    }
+
+    public void ShowGameOverMenuOnly()
+    {
+        if (gameOverMenu != null)
+            gameOverMenu.SetActive(true);
     }
 }
