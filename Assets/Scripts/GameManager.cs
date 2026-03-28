@@ -7,6 +7,7 @@ public class GameManager : MonoBehaviour
     private int currentEnergy;
     [SerializeField] private int energyThreshold = 3;
     [SerializeField] private GameObject boss;
+    private GameObject currentBoss;
     [SerializeField] private GameObject enemySpawner;
     private bool bossCalled = false;
     [SerializeField] private Image energyBar;
@@ -19,8 +20,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI coinText;
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private GameObject scoreUI;
-    [SerializeField] private GameObject shopButton;
     [SerializeField] private GameObject coinIcon;
+    [SerializeField] private TextMeshProUGUI usbText;
+    [SerializeField] private GameObject usbIcon;
+    [SerializeField] private GameObject shopButton;
+    [SerializeField] private GameObject weaponButton;
 
     public static GameManager instance;
 
@@ -37,6 +41,14 @@ public class GameManager : MonoBehaviour
 
         UpdateCoinUI();
         UpdateScore();
+        UpdateUSBUI();
+
+        // 🔥 đăng ký event USB để auto update UI
+        if (USBManager.Instance != null)
+        {
+            USBManager.Instance.OnUSBChanged += UpdateUSBUI;
+        }
+
         currentEnergy = 0;
         UpdateEnergyBar();
         boss.SetActive(false);
@@ -69,11 +81,12 @@ public class GameManager : MonoBehaviour
         PlayerPrefs.Save();
     }
 
+    // ================= COIN =================
     private void UpdateCoinUI()
     {
         if (coinText != null && CoinManager.Instance != null)
         {
-            coinText.text = CoinManager.Instance.coinInRun.ToString();
+            coinText.text = CoinManager.Instance.totalCoin.ToString(); 
         }
     }
 
@@ -87,6 +100,26 @@ public class GameManager : MonoBehaviour
         UpdateCoinUI();
     }
 
+    // ================= USB =================
+    private void UpdateUSBUI()
+    {
+        if (usbText != null && USBManager.Instance != null)
+        {
+            usbText.text = USBManager.Instance.totalUSB.ToString(); 
+        }
+    }
+
+    public void AddUSB(int amount)
+    {
+        if (USBManager.Instance != null)
+        {
+            USBManager.Instance.AddUSBInRun(amount);
+        }
+
+        UpdateUSBUI();
+    }
+
+    // ================= SCORE =================
     public void AddScore(int points)
     {
         score += points;
@@ -101,6 +134,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // ================= ENERGY =================
     public void AddEnergy()
     {
         if (bossCalled) return;
@@ -108,7 +142,7 @@ public class GameManager : MonoBehaviour
         currentEnergy += 1;
         UpdateEnergyBar();
 
-        if (currentEnergy == energyThreshold)
+        if (currentEnergy >= energyThreshold)
         {
             CallBoss();
         }
@@ -117,9 +151,23 @@ public class GameManager : MonoBehaviour
     private void CallBoss()
     {
         bossCalled = true;
-        boss.SetActive(true);
-        enemySpawner.SetActive(false);
+
+        GameObject playerObj = GameObject.FindWithTag("Player");
+        Vector3 spawnOffset = new Vector3(4f, 4f, 0f); 
+
+        if (playerObj != null && boss != null)
+        {
+            currentBoss = Instantiate(boss, playerObj.transform.position + spawnOffset, Quaternion.identity);
+            currentBoss.SetActive(true); 
+        }
+
         audioManager.PlayBossSound();
+    }
+    public void ResetBoss()
+    {
+        bossCalled = false;
+        currentEnergy = 0;
+        UpdateEnergyBar();
     }
 
     private void UpdateEnergyBar()
@@ -131,6 +179,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // ================= MENU =================
     public void MainMenu()
     {
         mainMenu.SetActive(true);
@@ -143,14 +192,20 @@ public class GameManager : MonoBehaviour
         {
             shopButton.SetActive(true);
         }
+        if (weaponButton != null)
+        {
+            weaponButton.SetActive(true);
+        }
 
         Time.timeScale = 0f;
-        if (coinIcon != null)
+
+        if (coinIcon != null) coinIcon.SetActive(true);
+        if (usbIcon != null) usbIcon.SetActive(true);
+        if (scoreUI != null)
         {
-            coinIcon.SetActive(false);
+            scoreUI.SetActive(false);
         }
     }
-
 
     public void OpenMainMenu()
     {
@@ -159,13 +214,16 @@ public class GameManager : MonoBehaviour
         pauseMenu.SetActive(false);
         winMenu.SetActive(false);
         scoreUI.SetActive(false);
+
         Time.timeScale = 0f;
-        if (coinIcon != null)
+
+        if (coinIcon != null) coinIcon.SetActive(false);
+        if (usbIcon != null) usbIcon.SetActive(false);
+        if (scoreUI != null)
         {
-            coinIcon.SetActive(false);
+            scoreUI.SetActive(false);
         }
     }
-
 
     public void GameOverMenu()
     {
@@ -174,15 +232,24 @@ public class GameManager : MonoBehaviour
             CoinManager.Instance.SaveRunCoinToTotal();
         }
 
+        if (USBManager.Instance != null)
+        {
+            USBManager.Instance.SaveRunUSBToTotal();
+        }
+
         gameOverMenu.SetActive(true);
         mainMenu.SetActive(false);
         pauseMenu.SetActive(false);
         winMenu.SetActive(false);
         scoreUI.SetActive(false);
+
         Time.timeScale = 0f;
-        if (coinIcon != null)
+
+        if (coinIcon != null) coinIcon.SetActive(false);
+        if (usbIcon != null) usbIcon.SetActive(false);
+        if (scoreUI != null)
         {
-            coinIcon.SetActive(false);
+            scoreUI.SetActive(false);
         }
     }
 
@@ -216,12 +283,18 @@ public class GameManager : MonoBehaviour
         {
             shopButton.SetActive(false);
         }
-
+        if (weaponButton != null)
+        {
+            weaponButton.SetActive(false);
+        }
         Time.timeScale = 1f;
         audioManager.PlayDefaultSound();
-        if (coinIcon != null)
+
+        if (coinIcon != null) coinIcon.SetActive(true);
+        if (usbIcon != null) usbIcon.SetActive(true);
+        if (scoreUI != null)
         {
-            coinIcon.SetActive(true);
+            scoreUI.SetActive(true);
         }
     }
 
@@ -236,11 +309,18 @@ public class GameManager : MonoBehaviour
         {
             shopButton.SetActive(false);
         }
+        if (weaponButton != null)
+        {
+            weaponButton.SetActive(false);
+        }
 
         Time.timeScale = 1f;
-        if (coinIcon != null)
+
+        if (coinIcon != null) coinIcon.SetActive(true);
+        if (usbIcon != null) usbIcon.SetActive(true);
+        if (scoreUI != null)
         {
-            coinIcon.SetActive(true);
+            scoreUI.SetActive(true);
         }
     }
 }

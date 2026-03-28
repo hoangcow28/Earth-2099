@@ -22,7 +22,9 @@ public class Gun : MonoBehaviour
     [SerializeField] private AudioManager audioManager;
 
     [SerializeField] private int damage = 10;
-
+    private int gunLevel;
+    private Sprite currentGunSprite;
+    private int baseDamage;
     [Header("Gun Visual")]
     [SerializeField] private SpriteRenderer gunSpriteRenderer;
     [SerializeField] private Sprite pistolSprite;
@@ -120,7 +122,7 @@ public class Gun : MonoBehaviour
             }
             else
             {
-                ammoText .text = "Empty";
+                ammoText.text = "Empty";
             }
         }
     }
@@ -142,8 +144,9 @@ public class Gun : MonoBehaviour
 
         if (equippedWeaponIndex == 0)
         {
-            currentGunId = "PistolDefault";
-            damage = 10;
+            currentGunId = "Pistol";
+            baseDamage = 10;
+            currentGunSprite = pistolSprite;
 
             if (gunSpriteRenderer != null)
                 gunSpriteRenderer.sprite = pistolSprite;
@@ -152,8 +155,9 @@ public class Gun : MonoBehaviour
         }
         else if (equippedWeaponIndex == 1)
         {
-            currentGunId = "RifleLv1";
-            damage = 20;
+            currentGunId = "Rifle";
+            baseDamage = 20;
+            currentGunSprite = rifleSprite;
 
             if (gunSpriteRenderer != null)
                 gunSpriteRenderer.sprite = rifleSprite;
@@ -162,8 +166,9 @@ public class Gun : MonoBehaviour
         }
         else if (equippedWeaponIndex == 2)
         {
-            currentGunId = "PlasmaGun";
-            damage = 35;
+            currentGunId = "Plasma";
+            baseDamage = 35;
+            currentGunSprite = plasmaSprite;
 
             if (gunSpriteRenderer != null)
                 gunSpriteRenderer.sprite = plasmaSprite;
@@ -172,8 +177,9 @@ public class Gun : MonoBehaviour
         }
         else
         {
-            currentGunId = "PistolDefault";
-            damage = 10;
+            currentGunId = "Pistol";
+            baseDamage = 10;
+            currentGunSprite = pistolSprite;
 
             if (gunSpriteRenderer != null)
                 gunSpriteRenderer.sprite = pistolSprite;
@@ -181,6 +187,54 @@ public class Gun : MonoBehaviour
             transform.localScale = pistolScale;
         }
 
-        Debug.Log("Equipped Weapon Index = " + equippedWeaponIndex + " | Gun = " + currentGunId + " | Damage = " + damage);
+    
+        gunLevel = PlayerPrefs.GetInt(currentGunId + "_level", 1);
+
+        damage = baseDamage + (gunLevel - 1) * 5;
+
+        Debug.Log("Gun = " + currentGunId +
+                  " | Level = " + gunLevel +
+                  " | Damage = " + damage);
+    }
+    public int GetGunLevel()
+    {
+        return gunLevel;
+    }
+    public int GetUpgradeCost()
+    {
+        return (int)Mathf.Pow(2, gunLevel - 1);
+    }
+    public void UpgradeGun()
+    {
+        int cost = GetUpgradeCost();
+
+        if (USBManager.Instance != null && USBManager.Instance.SpendUSB(cost))
+        {
+            gunLevel++;
+
+            PlayerPrefs.SetInt(currentGunId + "_level", gunLevel);
+
+            // tính lại damage
+            damage = baseDamage + (gunLevel - 1) * 5;
+
+            Debug.Log("Upgrade thành công! Level: " + gunLevel);
+        }
+        else
+        {
+            Debug.Log("Không đủ USB!");
+        }
+    }
+    public Sprite GetGunSprite()
+    {
+        return currentGunSprite;
+    }
+
+    public string GetGunName()
+    {
+        return currentGunId;
+    }
+    public int GetBaseDamage()
+    {
+        return baseDamage;
     }
 }

@@ -25,6 +25,7 @@ public class BossEnemy : Enemy
     {
         Instantiate(usbPrefabs, transform.position, Quaternion.identity);
         base.Die();
+        GameManager.instance.ResetBoss();
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {

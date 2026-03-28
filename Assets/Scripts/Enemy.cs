@@ -12,6 +12,7 @@ public abstract class Enemy : MonoBehaviour
     [SerializeField] private Image hpBar;
     [SerializeField] protected float enterDamage = 10f; // khi cham vao player
     [SerializeField] protected float stayDamage = 1f;  // khi cham roi ma player khong chay
+    private EnenmySpawner spawner;
     protected virtual void Start()
     {
         player = FindAnyObjectByType<Player>();
@@ -55,7 +56,16 @@ public abstract class Enemy : MonoBehaviour
     }
     protected virtual void Die()
     {
+        if (spawner != null)
+        {
+            spawner.EnemyDied(); // báo về spawner
+        }
+        GameManager.instance.AddScore(10);
         Destroy(gameObject);
+    }
+    public void Init(EnenmySpawner spawnerRef) // biết ai tạo ra
+    {
+        spawner = spawnerRef;
     }
     protected void UpdateHpBar()
     {

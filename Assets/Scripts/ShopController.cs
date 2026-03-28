@@ -13,6 +13,7 @@ public class ShopController : MonoBehaviour
 
     public void CloseShop()
     {
+        Debug.Log("Clicked X");
         shopPanel.SetActive(false);
     }
 

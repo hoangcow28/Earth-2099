@@ -8,7 +8,7 @@ public class CoinManager : MonoBehaviour
     public int coinInRun = 0;
     public int totalCoin = 0;
 
-    public event Action OnCoinChanged; // 🔥 THÊM DÒNG NÀY
+    public event Action OnCoinChanged; 
 
     private void Awake()
     {
@@ -44,7 +44,7 @@ public class CoinManager : MonoBehaviour
 
         coinInRun = 0;
 
-        OnCoinChanged?.Invoke(); // 🔥 QUAN TRỌNG
+        OnCoinChanged?.Invoke(); 
     }
 
     public void LoadTotalCoin()
@@ -65,7 +65,7 @@ public class CoinManager : MonoBehaviour
             PlayerPrefs.SetInt("TotalCoin", totalCoin);
             PlayerPrefs.Save();
 
-            OnCoinChanged?.Invoke(); // 🔥 QUAN TRỌNG
+            OnCoinChanged?.Invoke(); 
 
             return true;
         }
