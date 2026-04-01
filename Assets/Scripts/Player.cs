@@ -83,4 +83,15 @@ public class Player : MonoBehaviour
             hpBar.fillAmount = currentHp / maxHp;
         }
     }
+    public void ReviveHalfHealth()
+    {
+        currentHp = maxHp / 2f;
+
+        if (currentHp <= 0)
+            currentHp = 1f;
+
+        UpdateHpBar();
+
+        Debug.Log("Player revived with half HP: " + currentHp);
+    }
 }

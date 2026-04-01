@@ -4,12 +4,12 @@ using UnityEngine.UI;
 
 public class WeaponInventory : MonoBehaviour
 {
-    [SerializeField] private Button defaultGunButton;
-    [SerializeField] private Button gunLv1Button;
+     private Button defaultGunButton;
+     private Button gunLv1Button;
 
-    [SerializeField] private TMP_Text defaultGunStatusText;
-    [SerializeField] private TMP_Text gunLv1StatusText;
-    [SerializeField] private TMP_Text currentGunText;
+     private TMP_Text defaultGunStatusText;
+     private TMP_Text gunLv1StatusText;
+     private TMP_Text currentGunText;
 
     private void OnEnable()
     {

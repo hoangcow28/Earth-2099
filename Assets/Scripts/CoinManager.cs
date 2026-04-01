@@ -28,6 +28,7 @@ public class CoinManager : MonoBehaviour
     {
         coinInRun += amount;
         Debug.Log("Coin in run = " + coinInRun);
+        OnCoinChanged?.Invoke();
     }
 
     public void SaveRunCoinToTotal()

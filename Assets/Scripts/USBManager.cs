@@ -165,4 +165,9 @@ public class USBManager : MonoBehaviour
 
         return false;
     }
+    public void ResetRunUSB()
+    {
+        usbInRun = 0;
+        OnUSBChanged?.Invoke();
+    }
 }

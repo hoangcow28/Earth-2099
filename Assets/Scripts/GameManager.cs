@@ -25,15 +25,16 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject usbIcon;
     [SerializeField] private GameObject shopButton;
     [SerializeField] private GameObject weaponButton;
-
+    [SerializeField] private GameObject reviveButton;
+    private bool hasUsedAdRevive = false;
+    private bool isInGame = false;
     public static GameManager instance;
-
+    private int score = 0;
     void Awake()
     {
         instance = this;
     }
-
-    private int score = 0;
+    
 
     void Start()
     {
@@ -42,8 +43,11 @@ public class GameManager : MonoBehaviour
         UpdateCoinUI();
         UpdateScore();
         UpdateUSBUI();
-
-        // 🔥 đăng ký event USB để auto update UI
+        if (CoinManager.Instance != null)
+        {
+            CoinManager.Instance.OnCoinChanged += UpdateCoinUI;
+        }
+        
         if (USBManager.Instance != null)
         {
             USBManager.Instance.OnUSBChanged += UpdateUSBUI;
@@ -54,6 +58,54 @@ public class GameManager : MonoBehaviour
         boss.SetActive(false);
         MainMenu();
         audioManager.StopAudioGame();
+    }
+    void OnDestroy()
+    {
+        if (CoinManager.Instance != null)
+        {
+            CoinManager.Instance.OnCoinChanged -= UpdateCoinUI;
+        }
+    }
+    public void RevivePlayer()
+    {
+        if (hasUsedAdRevive)
+        {
+            Debug.Log("Da dung revive bang quang cao roi.");
+            return;
+        }
+
+        Debug.Log("Revive player");
+
+        hasUsedAdRevive = true;
+
+        mainMenu.SetActive(false);
+        gameOverMenu.SetActive(false);
+        pauseMenu.SetActive(false);
+        winMenu.SetActive(false);
+
+        if (scoreUI != null)
+            scoreUI.SetActive(true);
+
+        if (shopButton != null)
+            shopButton.SetActive(false);
+
+        if (coinIcon != null)
+            coinIcon.SetActive(true);
+
+        if (reviveButton != null)
+            reviveButton.SetActive(false);
+
+        Time.timeScale = 1f;
+
+        Player player = FindObjectOfType<Player>();
+        if (player != null)
+        {
+            player.ReviveHalfHealth();
+        }
+        else
+        {
+            Debug.LogError("Khong tim thay Player trong scene.");
+        }
     }
 
     private void InitWeaponData()
@@ -86,7 +138,10 @@ public class GameManager : MonoBehaviour
     {
         if (coinText != null && CoinManager.Instance != null)
         {
-            coinText.text = CoinManager.Instance.totalCoin.ToString(); 
+            if (isInGame)
+                coinText.text = CoinManager.Instance.coinInRun.ToString();
+            else
+                coinText.text = CoinManager.Instance.totalCoin.ToString();
         }
     }
 
@@ -105,7 +160,10 @@ public class GameManager : MonoBehaviour
     {
         if (usbText != null && USBManager.Instance != null)
         {
-            usbText.text = USBManager.Instance.totalUSB.ToString(); 
+            if (isInGame)
+                usbText.text = USBManager.Instance.usbInRun.ToString();
+            else
+                usbText.text = USBManager.Instance.totalUSB.ToString();
         }
     }
 
@@ -187,7 +245,8 @@ public class GameManager : MonoBehaviour
         pauseMenu.SetActive(false);
         winMenu.SetActive(false);
         scoreUI.SetActive(false);
-
+        isInGame = false;
+        UpdateCoinUI();
         if (shopButton != null)
         {
             shopButton.SetActive(true);
@@ -251,6 +310,10 @@ public class GameManager : MonoBehaviour
         {
             scoreUI.SetActive(false);
         }
+        if (reviveButton != null)
+        {
+            reviveButton.SetActive(!hasUsedAdRevive);
+        }
     }
 
     public void PauseGameMenu()
@@ -273,6 +336,11 @@ public class GameManager : MonoBehaviour
 
     public void StartGame()
     {
+        isInGame = true;
+        UpdateCoinUI();
+        USBManager.Instance.ResetRunUSB();
+        UpdateUSBUI();
+        hasUsedAdRevive = false;
         mainMenu.SetActive(false);
         gameOverMenu.SetActive(false);
         pauseMenu.SetActive(false);
@@ -282,6 +350,10 @@ public class GameManager : MonoBehaviour
         if (shopButton != null)
         {
             shopButton.SetActive(false);
+        }
+        if (reviveButton != null)
+        {
+            reviveButton.SetActive(true);
         }
         if (weaponButton != null)
         {
@@ -297,7 +369,10 @@ public class GameManager : MonoBehaviour
             scoreUI.SetActive(true);
         }
     }
-
+    public bool CanUseAdRevive()
+    {
+        return !hasUsedAdRevive;
+    }
     public void ResumeGame()
     {
         mainMenu.SetActive(false);
@@ -322,5 +397,16 @@ public class GameManager : MonoBehaviour
         {
             scoreUI.SetActive(true);
         }
+    }
+    public void HideGameOverMenuOnly()
+    {
+        if (gameOverMenu != null)
+            gameOverMenu.SetActive(false);
+    }
+
+    public void ShowGameOverMenuOnly()
+    {
+        if (gameOverMenu != null)
+            gameOverMenu.SetActive(true);
     }
 }
