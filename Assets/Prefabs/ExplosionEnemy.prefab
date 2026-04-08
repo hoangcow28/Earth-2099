@@ -198,7 +198,7 @@ MonoBehaviour:
   maxHp: 60
   hpBar: {fileID: 6820261973808482769}
   enterDamage: 10
-  stayDamage: 0
+  stayDamage: 2
   explosionPrefabs: {fileID: 2451029975859405282, guid: f2cc09a339850b043b40a546686ad916, type: 3}
 --- !u!1001 &5267978913307306167
 PrefabInstance:

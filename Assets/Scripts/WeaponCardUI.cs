@@ -32,7 +32,13 @@ public class WeaponCardUI : MonoBehaviour
 
     public void RefreshUI()
     {
-        int currentCoin = shopManager.CurrentCoin;
+        // 🔥 Lấy coin trực tiếp từ CoinManager
+        int currentCoin = 0;
+
+        if (CoinManager.Instance != null)
+        {
+            currentCoin = CoinManager.Instance.totalCoin;
+        }
 
         if (!weaponData.isUnlocked)
         {
@@ -66,11 +72,17 @@ public class WeaponCardUI : MonoBehaviour
     {
         if (!weaponData.isUnlocked)
         {
-            shopManager.BuyWeapon(weaponData.weaponId);
+            if (shopManager != null)
+            {
+                shopManager.BuyWeapon(weaponData.weaponId);
+            }
         }
         else if (!weaponData.isEquipped)
         {
-            shopManager.EquipWeapon(weaponData.weaponId);
+            if (shopManager != null)
+            {
+                shopManager.EquipWeapon(weaponData.weaponId);
+            }
         }
     }
 }

@@ -21,7 +21,7 @@ public class Gun : MonoBehaviour
     [SerializeField] private TextMeshProUGUI ammoText;
     [SerializeField] private AudioManager audioManager;
 
-    [SerializeField] private int damage = 10;
+    [SerializeField] private int damage = 100;
     private int gunLevel;
     private Sprite currentGunSprite;
     private int baseDamage;
@@ -206,23 +206,30 @@ public class Gun : MonoBehaviour
     }
     public void UpgradeGun()
     {
-        int cost = GetUpgradeCost();
+        //int cost = GetUpgradeCost();
 
-        if (USBManager.Instance != null && USBManager.Instance.SpendUSB(cost))
-        {
-            gunLevel++;
+        //if (USBManager.Instance != null && USBManager.Instance.SpendUSB(cost))
+        //{
+        //    gunLevel++;
 
-            PlayerPrefs.SetInt(currentGunId + "_level", gunLevel);
+        //    PlayerPrefs.SetInt(currentGunId + "_level", gunLevel);
 
-            // tính lại damage
-            damage = baseDamage + (gunLevel - 1) * 5;
+        //    // tính lại damage
+        //    damage = baseDamage + (gunLevel - 1) * 5;
 
-            Debug.Log("Upgrade thành công! Level: " + gunLevel);
-        }
-        else
-        {
-            Debug.Log("Không đủ USB!");
-        }
+        //    Debug.Log("Upgrade thành công! Level: " + gunLevel);
+        //}
+        //else
+        //{
+        //    Debug.Log("Không đủ USB!");
+        //}
+        gunLevel++;
+
+        PlayerPrefs.SetInt(currentGunId + "_level", gunLevel);
+
+        damage = baseDamage + (gunLevel - 1) * 5;
+
+        Debug.Log("Upgrade thành công! Level: " + gunLevel);
     }
     public Sprite GetGunSprite()
     {

@@ -255,6 +255,10 @@ public class GameManager : MonoBehaviour
         {
             weaponButton.SetActive(true);
         }
+        if (CoinManager.Instance != null)
+        {
+            CoinManager.Instance.ForceUpdateUI(); 
+        }
 
         Time.timeScale = 0f;
 
@@ -273,9 +277,9 @@ public class GameManager : MonoBehaviour
         pauseMenu.SetActive(false);
         winMenu.SetActive(false);
         scoreUI.SetActive(false);
-
+        isInGame = false;
         Time.timeScale = 0f;
-
+        UpdateCoinUI();
         if (coinIcon != null) coinIcon.SetActive(false);
         if (usbIcon != null) usbIcon.SetActive(false);
         if (scoreUI != null)

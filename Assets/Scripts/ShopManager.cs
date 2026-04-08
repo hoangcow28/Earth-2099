@@ -10,8 +10,6 @@ public class ShopManager : MonoBehaviour
     [Header("Weapon Cards")]
     public WeaponCardUI[] weaponCards;
 
-    public int CurrentCoin { get; private set; }
-
     private List<WeaponData> weapons = new List<WeaponData>();
 
     private void Start()
@@ -19,12 +17,27 @@ public class ShopManager : MonoBehaviour
         LoadData();
         SetupCards();
         RefreshAllUI();
+
+        if (CoinManager.Instance != null)
+        {
+            CoinManager.Instance.OnCoinChanged += OnCoinChanged;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (CoinManager.Instance != null)
+        {
+            CoinManager.Instance.OnCoinChanged -= OnCoinChanged;
+        }
+    }
+    private void OnCoinChanged()
+    {
+        RefreshAllUI();
     }
 
     void LoadData()
     {
-        CurrentCoin = PlayerPrefs.GetInt("TotalCoin", 0);
-
         int equippedIndex = PlayerPrefs.GetInt("equipped_weapon", 0);
 
         weapons = new List<WeaponData>()
@@ -67,9 +80,13 @@ public class ShopManager : MonoBehaviour
         }
     }
 
+    // ================= REFRESH UI =================
     public void RefreshAllUI()
     {
-        coinText.text = "Coin: " + CurrentCoin;
+        if (coinText != null && CoinManager.Instance != null)
+        {
+            coinText.text = "Coin: " + CoinManager.Instance.totalCoin;
+        }
 
         foreach (var card in weaponCards)
         {
@@ -77,22 +94,29 @@ public class ShopManager : MonoBehaviour
         }
     }
 
+    // ================= BUY =================
     public void BuyWeapon(string weaponId)
     {
         WeaponData weapon = weapons.Find(w => w.weaponId == weaponId);
         if (weapon == null) return;
         if (weapon.isUnlocked) return;
-        if (CurrentCoin < weapon.price) return;
 
-        CurrentCoin -= weapon.price;
-        weapon.isUnlocked = true;
+        // 🔥 Dùng CoinManager duy nhất
+        if (CoinManager.Instance != null && CoinManager.Instance.SpendCoin(weapon.price))
+        {
+            weapon.isUnlocked = true;
 
-        SaveCoin();
-        SaveWeaponUnlock(weapon.weaponId, true);
+            SaveWeaponUnlock(weapon.weaponId, true);
 
-        RefreshAllUI();
+            RefreshAllUI();
+        }
+        else
+        {
+            Debug.Log("Not enough coin!");
+        }
     }
 
+    // ================= EQUIP =================
     public void EquipWeapon(string weaponId)
     {
         for (int i = 0; i < weapons.Count; i++)
@@ -116,12 +140,7 @@ public class ShopManager : MonoBehaviour
         }
     }
 
-    void SaveCoin()
-    {
-        PlayerPrefs.SetInt("TotalCoin", CurrentCoin);
-        PlayerPrefs.Save();
-    }
-
+    // ================= SAVE =================
     void SaveWeaponUnlock(string weaponId, bool unlocked)
     {
         PlayerPrefs.SetInt("weapon_" + weaponId + "_unlocked", unlocked ? 1 : 0);
@@ -143,5 +162,12 @@ public class ShopManager : MonoBehaviour
 
         PlayerPrefs.SetInt("equipped_weapon", equippedIndex);
         PlayerPrefs.Save();
+    }
+
+    // ================= OPTIONAL: GỌI KHI MỞ SHOP =================
+    public void OpenShop()
+    {
+        LoadData();
+        RefreshAllUI();
     }
 }
